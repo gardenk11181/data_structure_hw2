@@ -1,4 +1,3 @@
-
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -54,6 +53,28 @@ public class MyLinkedList<T> implements ListInterface<T> {
 		numItems += 1;
 	}
 
+	public void add(int index, T item) { // add method
+    	Node<T> last = head;
+    	int count=0;
+    	while(count<index) {
+    		last = last.getNext();
+    		count++;
+		}
+    	Node<T> temp = new Node<T>(item);
+    	temp.setNext(last.getNext());
+    	last.setNext(temp);
+	}
+
+	public void remove(int index) { // remove method
+    	Node<T> last = head;
+    	int count=0;
+    	while(count<index) {
+    		last = last.getNext();
+    		count++;
+		}
+    	last.setNext(last.getNext().getNext());
+	}
+
 	@Override
 	public void removeAll() {
 		head.setNext(null);
@@ -101,4 +122,6 @@ class MyLinkedListIterator<T> implements Iterator<T> {
 		curr = prev;
 		prev = null;
 	}
+
+
 }

@@ -1,3 +1,4 @@
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -8,11 +9,13 @@ import java.util.NoSuchElementException;
  * 유지하는 데이터베이스이다. 
  */
 public class MovieDB {
+	MyLinkedList<MovieDBItem> dbItems;
+
     public MovieDB() {
         // FIXME implement this
-    	
     	// HINT: MovieDBGenre 클래스를 정렬된 상태로 유지하기 위한 
     	// MyLinkedList 타입의 멤버 변수를 초기화 한다.
+		dbItems = new MyLinkedList<MovieDBItem>();
     }
 
     public void insert(MovieDBItem item) {
@@ -21,7 +24,19 @@ public class MovieDB {
 
     	// Printing functionality is provided for the sake of debugging.
         // This code should be removed before submitting your work.
-        System.err.printf("[trace] MovieDB: INSERT [%s] [%s]\n", item.getGenre(), item.getTitle());
+//        System.err.printf("[trace] MovieDB: INSERT [%s] [%s]\n", item.getGenre(), item.getTitle());
+		int index=0;
+		for(MovieDBItem dbItem: dbItems) { // 들어갈 자리 지정
+			switch (dbItem.compareTo(item)) {
+				case 0: return;
+				case -1: {
+					dbItems.add(index,item);
+					return;
+				}
+			}
+			index++;
+		}
+		dbItems.add(item);
     }
 
     public void delete(MovieDBItem item) {
@@ -30,7 +45,15 @@ public class MovieDB {
     	
     	// Printing functionality is provided for the sake of debugging.
         // This code should be removed before submitting your work.
-        System.err.printf("[trace] MovieDB: DELETE [%s] [%s]\n", item.getGenre(), item.getTitle());
+//        System.err.printf("[trace] MovieDB: DELETE [%s] [%s]\n", item.getGenre(), item.getTitle());
+
+		int index=0;
+		for(MovieDBItem dbItem: dbItems) {
+			if(dbItem.compareTo(item)==0) {
+				dbItems.remove(index);
+			}
+			index++;
+		}
     }
 
     public MyLinkedList<MovieDBItem> search(String term) {
@@ -44,11 +67,15 @@ public class MovieDB {
     	
         // This tracing functionality is provided for the sake of debugging.
         // This code should be removed before submitting your work.
-    	System.err.printf("[trace] MovieDB: SEARCH [%s]\n", term);
+//    	System.err.printf("[trace] MovieDB: SEARCH [%s]\n", term);
     	
     	// FIXME remove this code and return an appropriate MyLinkedList<MovieDBItem> instance.
     	// This code is supplied for avoiding compilation error.   
         MyLinkedList<MovieDBItem> results = new MyLinkedList<MovieDBItem>();
+
+        for(MovieDBItem dbItem: dbItems) {
+        	if(dbItem.getTitle().contains(term)) results.add(dbItem);
+		}
 
         return results;
     }
@@ -64,11 +91,11 @@ public class MovieDB {
 
     	// Printing functionality is provided for the sake of debugging.
         // This code should be removed before submitting your work.
-        System.err.printf("[trace] MovieDB: ITEMS\n");
+//        System.err.printf("[trace] MovieDB: ITEMS\n");
 
     	// FIXME remove this code and return an appropriate MyLinkedList<MovieDBItem> instance.
     	// This code is supplied for avoiding compilation error.   
-        MyLinkedList<MovieDBItem> results = new MyLinkedList<MovieDBItem>();
+        MyLinkedList<MovieDBItem> results = dbItems;
         
     	return results;
     }
@@ -96,8 +123,11 @@ class Genre extends Node<String> implements Comparable<Genre> {
 	}
 }
 
-class MovieList implements ListInterface<String> {	
+class MovieList implements ListInterface<String> {
+	Node<String> head;
+	int numItems;
 	public MovieList() {
+		head = new Node<String>(null);
 	}
 
 	@Override
