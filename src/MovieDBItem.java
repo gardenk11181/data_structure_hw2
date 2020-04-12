@@ -28,7 +28,9 @@ public class MovieDBItem implements Comparable<MovieDBItem> {
         // TODO delete the line below and implement this method
         // implemented
         if(this.genre.compareTo(other.genre)==0) {
+//            System.err.println("title: "+title+", compare ="+this.title.compareTo(other.title));
             return this.title.compareTo(other.title);
+
         } else {
             return this.genre.compareTo(other.genre);
         }

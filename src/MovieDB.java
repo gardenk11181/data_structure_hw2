@@ -27,13 +27,12 @@ public class MovieDB {
 //        System.err.printf("[trace] MovieDB: INSERT [%s] [%s]\n", item.getGenre(), item.getTitle());
 		int index=0;
 		for(MovieDBItem dbItem: dbItems) { // 들어갈 자리 지정
-			switch (dbItem.compareTo(item)) {
-				case 0: return;
-				case -1: {
-					dbItems.add(index,item);
-					return;
-				}
+			if(item.compareTo(dbItem)==0) return;
+			if(item.compareTo(dbItem)<0) {
+				dbItems.add(index,item);
+				return;
 			}
+
 			index++;
 		}
 		dbItems.add(item);

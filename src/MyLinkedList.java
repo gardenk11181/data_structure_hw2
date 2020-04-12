@@ -63,6 +63,7 @@ public class MyLinkedList<T> implements ListInterface<T> {
     	Node<T> temp = new Node<T>(item);
     	temp.setNext(last.getNext());
     	last.setNext(temp);
+		numItems += 1;
 	}
 
 	public void remove(int index) { // remove method
@@ -73,6 +74,7 @@ public class MyLinkedList<T> implements ListInterface<T> {
     		count++;
 		}
     	last.setNext(last.getNext().getNext());
+    	numItems -= 1;
 	}
 
 	@Override
