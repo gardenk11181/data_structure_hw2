@@ -9,13 +9,13 @@ import java.util.NoSuchElementException;
  * 유지하는 데이터베이스이다. 
  */
 public class MovieDB {
-	MyLinkedList<MovieDBItem> dbItems;
+	MyLinkedList<Genre> dbGenres;
 
     public MovieDB() {
         // FIXME implement this
     	// HINT: MovieDBGenre 클래스를 정렬된 상태로 유지하기 위한 
     	// MyLinkedList 타입의 멤버 변수를 초기화 한다.
-		dbItems = new MyLinkedList<MovieDBItem>();
+		dbGenres = new MyLinkedList<Genre>();
     }
 
     public void insert(MovieDBItem item) {
@@ -25,17 +25,25 @@ public class MovieDB {
     	// Printing functionality is provided for the sake of debugging.
         // This code should be removed before submitting your work.
 //        System.err.printf("[trace] MovieDB: INSERT [%s] [%s]\n", item.getGenre(), item.getTitle());
+
+		Genre itemGenre = new Genre(item.getGenre());
+		String itemTitle = item.getTitle();
+
 		int index=0;
-		for(MovieDBItem dbItem: dbItems) { // 들어갈 자리 지정
-			if(item.compareTo(dbItem)==0) return;
-			if(item.compareTo(dbItem)<0) {
-				dbItems.add(index,item);
+		for(Genre genre: dbGenres) {
+			if(itemGenre.compareTo(genre)==0) {
+				genre.addMovie(itemTitle);
+				return;
+			} else if(itemGenre.compareTo(genre)<0) {
+				itemGenre.addMovie(itemTitle);
+				dbGenres.add(index,itemGenre);
 				return;
 			}
-
 			index++;
 		}
-		dbItems.add(item);
+		itemGenre.addMovie(itemTitle);
+		dbGenres.add(index,itemGenre);
+
     }
 
     public void delete(MovieDBItem item) {
@@ -46,13 +54,7 @@ public class MovieDB {
         // This code should be removed before submitting your work.
 //        System.err.printf("[trace] MovieDB: DELETE [%s] [%s]\n", item.getGenre(), item.getTitle());
 
-		int index=0;
-		for(MovieDBItem dbItem: dbItems) {
-			if(dbItem.compareTo(item)==0) {
-				dbItems.remove(index);
-			}
-			index++;
-		}
+
     }
 
     public MyLinkedList<MovieDBItem> search(String term) {
@@ -72,8 +74,10 @@ public class MovieDB {
     	// This code is supplied for avoiding compilation error.   
         MyLinkedList<MovieDBItem> results = new MyLinkedList<MovieDBItem>();
 
-        for(MovieDBItem dbItem: dbItems) {
-        	if(dbItem.getTitle().contains(term)) results.add(dbItem);
+        for(Genre genre: dbGenres) {
+        	for(String movie: genre.getMovieList()) {
+        		if(movie.contains(term)) results.add(new MovieDBItem(genre.getItem(),movie));
+			}
 		}
 
         return results;
@@ -94,32 +98,48 @@ public class MovieDB {
 
     	// FIXME remove this code and return an appropriate MyLinkedList<MovieDBItem> instance.
     	// This code is supplied for avoiding compilation error.   
-        MyLinkedList<MovieDBItem> results = dbItems;
+        MyLinkedList<MovieDBItem> results = new MyLinkedList<>();
+
+
+        for(Genre genre: dbGenres) {
+        	for(String title: genre.getMovieList()) {
+        		results.add(new MovieDBItem(genre.getItem(),title));
+			}
+		}
         
     	return results;
     }
 }
 
 class Genre extends Node<String> implements Comparable<Genre> {
+	private MovieList movieList = new MovieList();
+
+	public MovieList getMovieList() {
+		return movieList;
+	}
+
+	public void addMovie(String movie) {
+		movieList.add(movie);
+	}
+
 	public Genre(String name) {
 		super(name);
-		throw new UnsupportedOperationException("not implemented yet");
 	}
 	
 	@Override
 	public int compareTo(Genre o) {
-		throw new UnsupportedOperationException("not implemented yet");
+		return super.getItem().compareTo(o.getItem());
 	}
 
-	@Override
-	public int hashCode() {
-		throw new UnsupportedOperationException("not implemented yet");
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		throw new UnsupportedOperationException("not implemented yet");
-	}
+//	@Override
+//	public int hashCode() {
+//		throw new UnsupportedOperationException("not implemented yet");
+//	}
+//
+//	@Override
+//	public boolean equals(Object obj) {
+//		throw new UnsupportedOperationException("not implemented yet");
+//	}
 }
 
 class MovieList implements ListInterface<String> {
@@ -130,32 +150,86 @@ class MovieList implements ListInterface<String> {
 	}
 
 	@Override
-	public Iterator<String> iterator() {
-		throw new UnsupportedOperationException("not implemented yet");
+	public final Iterator<String> iterator() {
+		return new MovieListIterator<String>(this);
 	}
 
 	@Override
 	public boolean isEmpty() {
-		throw new UnsupportedOperationException("not implemented yet");
+		return numItems==0;
 	}
 
 	@Override
 	public int size() {
-		throw new UnsupportedOperationException("not implemented yet");
+		return numItems;
 	}
 
 	@Override
-	public void add(String item) {
-		throw new UnsupportedOperationException("not implemented yet");
+	public void add(String item) { // 정렬하며 무비리스트 삽입
+		Node<String> last = head;
+
+		while(last.getNext()!=null && item.compareTo(last.getNext().getItem())>0 ) {
+			last = last.getNext();
+		}
+
+		Node<String> temp = last.getNext();
+		last.setNext(new Node<String>(item));
+		if(temp!=null) last.getNext().setNext(temp);
+		numItems+=1;
 	}
 
 	@Override
 	public String first() {
-		throw new UnsupportedOperationException("not implemented yet");
+		return head.getItem();
 	}
 
 	@Override
 	public void removeAll() {
-		throw new UnsupportedOperationException("not implemented yet");
+		head.setNext(null);
 	}
+}
+
+class MovieListIterator<T> implements Iterator<String> {
+	// FIXME implement this
+	// Implement the iterator for MyLinkedList.
+	// You have to maintain the current position of the iterator.
+	private MovieList list;
+	private Node<String> curr;
+	private Node<String> prev;
+
+	public MovieListIterator(MovieList list) {
+		this.list = list;
+		this.curr = list.head;
+		this.prev = null;
+	}
+
+	@Override
+	public boolean hasNext() {
+		return curr.getNext() != null;
+	}
+
+	@Override
+	public String next() {
+		if (!hasNext())
+			throw new NoSuchElementException();
+
+		prev = curr;
+		curr = curr.getNext();
+
+		return curr.getItem();
+	}
+
+	@Override
+	public void remove() {
+		if (prev == null)
+			throw new IllegalStateException("next() should be called first");
+		if (curr == null)
+			throw new NoSuchElementException();
+		prev.removeNext();
+		list.numItems -= 1;
+		curr = prev;
+		prev = null;
+	}
+
+
 }
