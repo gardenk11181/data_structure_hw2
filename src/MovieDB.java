@@ -54,6 +54,13 @@ public class MovieDB {
         // This code should be removed before submitting your work.
 //        System.err.printf("[trace] MovieDB: DELETE [%s] [%s]\n", item.getGenre(), item.getTitle());
 
+		Genre itemGenre = new Genre(item.getGenre());
+		String itemMovie = item.getTitle();
+		for(Genre genre:dbGenres) {
+			if(genre.compareTo(itemGenre)==0) {
+				genre.removeMovie(itemMovie);
+			}
+		}
 
     }
 
@@ -118,6 +125,10 @@ class Genre extends Node<String> implements Comparable<Genre> {
 		return movieList;
 	}
 
+	public void removeMovie(String movie) {
+		movieList.remove(movie);
+	}
+
 	public void addMovie(String movie) {
 		movieList.add(movie);
 	}
@@ -168,14 +179,37 @@ class MovieList implements ListInterface<String> {
 	public void add(String item) { // 정렬하며 무비리스트 삽입
 		Node<String> last = head;
 
-		while(last.getNext()!=null && item.compareTo(last.getNext().getItem())>0 ) {
+		for(int i=0; i<numItems; i++) {
+			if(last.getNext()!=null && last.getNext().getItem().compareTo(item)==0) return;
+			if(last.getNext()==null || item.compareTo(last.getNext().getItem())<0) break;
 			last = last.getNext();
 		}
+		if(last.getNext()==null) {
+			last.setNext(new Node<>(item));
 
-		Node<String> temp = last.getNext();
-		last.setNext(new Node<String>(item));
-		if(temp!=null) last.getNext().setNext(temp);
+		} else {
+			Node<String> temp = last.getNext();
+			last.setNext(new Node<>(item));
+			last.getNext().setNext(temp);
+		}
+
+
 		numItems+=1;
+	}
+
+	public void remove(String item) {
+		Node<String> last = head;
+		for(int i=0; i<numItems; i++) {
+			if(last.getNext().getItem().compareTo(item)==0) {
+				if(last.getNext().getNext()==null) {
+					last.setNext(null);
+				} else {
+					last.setNext(last.getNext().getNext());
+				}
+				return;
+			}
+			last = last.getNext();
+		}
 	}
 
 	@Override
